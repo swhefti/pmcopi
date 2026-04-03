@@ -2,7 +2,7 @@
 
 A full-stack web app where you describe a product challenge and a 4-agent AI pipeline generates a complete PM artifact pack: PRD, competitive analysis, roadmap, and executive summary. Each artifact streams live. Export everything to PDF.
 
-**Live Demo:** https://pmcopi.vercel.app
+**Live Demo:** https://ai-pm-copilot.vercel.app
 
 ## Architecture
 
