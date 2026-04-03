@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { RoadmapContent, PRDContent, CompetitiveContent } from '@/types'
+import { parseJSONFromLLM } from '@/lib/parse-json'
 
 const client = new Anthropic()
 
@@ -15,7 +16,7 @@ export async function runRoadmapAgent(
 
 Given the product challenge, PRD, and competitive analysis, produce a 3-phase roadmap.
 
-Respond with ONLY valid JSON:
+IMPORTANT: Respond with ONLY raw JSON. Do NOT wrap in markdown code fences. No \`\`\`json, no \`\`\`, no explanation - just the JSON object:
 {
   "strategic_rationale": "2 sentences explaining the phasing logic",
   "phases": [
@@ -48,5 +49,5 @@ Effort guide: S=1 sprint, M=2-3 sprints, L=1-2 months, XL=2+ months`,
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return JSON.parse(text) as RoadmapContent
+  return parseJSONFromLLM<RoadmapContent>(text)
 }

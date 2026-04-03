@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { SummaryContent, PRDContent, CompetitiveContent, RoadmapContent } from '@/types'
+import { parseJSONFromLLM } from '@/lib/parse-json'
 
 const client = new Anthropic()
 
@@ -16,7 +17,7 @@ export async function runSummaryAgent(
 
 Synthesise the PRD, competitive analysis, and roadmap into a crisp one-pager that a non-technical executive can read in 90 seconds.
 
-Respond with ONLY valid JSON:
+IMPORTANT: Respond with ONLY raw JSON. Do NOT wrap in markdown code fences. No \`\`\`json, no \`\`\`, no explanation - just the JSON object:
 {
   "headline": "one punchy sentence (max 15 words) describing the product opportunity",
   "problem": "2 sentences — the pain, quantified if possible",
@@ -37,5 +38,5 @@ Write for a C-suite audience. Avoid jargon. Be specific about numbers where the 
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return JSON.parse(text) as SummaryContent
+  return parseJSONFromLLM<SummaryContent>(text)
 }

@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { PRDContent } from '@/types'
+import { parseJSONFromLLM } from '@/lib/parse-json'
 
 const client = new Anthropic()
 
@@ -11,7 +12,7 @@ export async function runPRDAgent(challenge: string): Promise<PRDContent> {
 
 Your task: write a structured PRD based on the product challenge provided.
 
-Respond with ONLY valid JSON matching this exact schema. No markdown, no explanation:
+IMPORTANT: Respond with ONLY raw JSON. Do NOT wrap in markdown code fences. No \`\`\`json, no \`\`\`, no explanation - just the JSON object:
 {
   "background": "2-3 sentences of market/context background",
   "problem_statement": "1 precise sentence stating the core problem",
@@ -33,5 +34,5 @@ Requirements:
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return JSON.parse(text) as PRDContent
+  return parseJSONFromLLM<PRDContent>(text)
 }

@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { CompetitiveContent, PRDContent } from '@/types'
+import { parseJSONFromLLM } from '@/lib/parse-json'
 
 const client = new Anthropic()
 
@@ -14,7 +15,7 @@ export async function runCompetitiveAgent(
 
 Given a product challenge and the PRD context, identify the 3 most relevant direct or indirect competitors and produce a sharp competitive analysis.
 
-Respond with ONLY valid JSON:
+IMPORTANT: Respond with ONLY raw JSON. Do NOT wrap in markdown code fences. No \`\`\`json, no \`\`\`, no explanation - just the JSON object:
 {
   "market_context": "2 sentences on the competitive landscape",
   "competitors": [
@@ -39,5 +40,5 @@ Use real, well-known companies as competitors where relevant. Be analytically ho
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return JSON.parse(text) as CompetitiveContent
+  return parseJSONFromLLM<CompetitiveContent>(text)
 }
