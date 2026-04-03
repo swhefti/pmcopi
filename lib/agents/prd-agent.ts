@@ -6,7 +6,7 @@ const client = new Anthropic()
 
 export async function runPRDAgent(challenge: string): Promise<PRDContent> {
   const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 4096,
     system: `You are a senior product manager at a top-tier tech company with 15 years of experience writing PRDs for products used by millions.
 
