@@ -1,6 +1,6 @@
 import { TokenUsage } from '@/types'
 
-// Claude Sonnet 4 pricing (per million tokens)
+// Claude Sonnet 4.6 pricing (per million tokens)
 const INPUT_PRICE_PER_MILLION = 3.0 // $3 per 1M input tokens
 const OUTPUT_PRICE_PER_MILLION = 15.0 // $15 per 1M output tokens
 

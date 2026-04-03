@@ -125,7 +125,7 @@ export function UsagePanel({ usage, isComplete }: UsagePanelProps) {
       </div>
 
       <div className="mt-4 text-xs text-gray-400">
-        Pricing: Claude Sonnet 4 — $3/M input tokens, $15/M output tokens
+        Pricing: Claude Sonnet 4.6 — $3/M input tokens, $15/M output tokens
       </div>
     </div>
   )
