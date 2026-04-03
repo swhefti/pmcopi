@@ -1,14 +1,20 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { RoadmapContent, PRDContent, CompetitiveContent } from '@/types'
+import { RoadmapContent, PRDContent, CompetitiveContent, TokenUsage } from '@/types'
 import { parseJSONFromLLM } from '@/lib/parse-json'
+import { calculateCost } from '@/lib/calculate-cost'
 
 const client = new Anthropic()
+
+export interface RoadmapAgentResult {
+  content: RoadmapContent
+  usage: TokenUsage
+}
 
 export async function runRoadmapAgent(
   challenge: string,
   prd: PRDContent,
   competitive: CompetitiveContent
-): Promise<RoadmapContent> {
+): Promise<RoadmapAgentResult> {
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
@@ -49,5 +55,8 @@ Effort guide: S=1 sprint, M=2-3 sprints, L=1-2 months, XL=2+ months`,
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return parseJSONFromLLM<RoadmapContent>(text)
+  const content = parseJSONFromLLM<RoadmapContent>(text)
+  const usage = calculateCost(message.usage.input_tokens, message.usage.output_tokens)
+
+  return { content, usage }
 }

@@ -1,10 +1,16 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { PRDContent } from '@/types'
+import { PRDContent, TokenUsage } from '@/types'
 import { parseJSONFromLLM } from '@/lib/parse-json'
+import { calculateCost } from '@/lib/calculate-cost'
 
 const client = new Anthropic()
 
-export async function runPRDAgent(challenge: string): Promise<PRDContent> {
+export interface PRDAgentResult {
+  content: PRDContent
+  usage: TokenUsage
+}
+
+export async function runPRDAgent(challenge: string): Promise<PRDAgentResult> {
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
@@ -34,5 +40,8 @@ Requirements:
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return parseJSONFromLLM<PRDContent>(text)
+  const content = parseJSONFromLLM<PRDContent>(text)
+  const usage = calculateCost(message.usage.input_tokens, message.usage.output_tokens)
+
+  return { content, usage }
 }

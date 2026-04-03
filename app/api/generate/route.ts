@@ -27,28 +27,28 @@ export async function POST(req: NextRequest) {
       try {
         // Agent 1: PRD
         send({ type: 'agent_start', agent: 'prd' })
-        const prdContent = await runPRDAgent(challenge)
-        send({ type: 'agent_complete', agent: 'prd', content: prdContent })
+        const prdResult = await runPRDAgent(challenge)
+        send({ type: 'agent_complete', agent: 'prd', content: prdResult.content, usage: prdResult.usage })
 
         // Agent 2: Competitive
         send({ type: 'agent_start', agent: 'competitive' })
-        const compContent = await runCompetitiveAgent(challenge, prdContent)
-        send({ type: 'agent_complete', agent: 'competitive', content: compContent })
+        const compResult = await runCompetitiveAgent(challenge, prdResult.content)
+        send({ type: 'agent_complete', agent: 'competitive', content: compResult.content, usage: compResult.usage })
 
         // Agent 3: Roadmap
         send({ type: 'agent_start', agent: 'roadmap' })
-        const roadmapContent = await runRoadmapAgent(challenge, prdContent, compContent)
-        send({ type: 'agent_complete', agent: 'roadmap', content: roadmapContent })
+        const roadmapResult = await runRoadmapAgent(challenge, prdResult.content, compResult.content)
+        send({ type: 'agent_complete', agent: 'roadmap', content: roadmapResult.content, usage: roadmapResult.usage })
 
         // Agent 4: Summary
         send({ type: 'agent_start', agent: 'summary' })
-        const summaryContent = await runSummaryAgent(
+        const summaryResult = await runSummaryAgent(
           challenge,
-          prdContent,
-          compContent,
-          roadmapContent
+          prdResult.content,
+          compResult.content,
+          roadmapResult.content
         )
-        send({ type: 'agent_complete', agent: 'summary', content: summaryContent })
+        send({ type: 'agent_complete', agent: 'summary', content: summaryResult.content, usage: summaryResult.usage })
 
         send({ type: 'pipeline_complete' })
       } catch (error) {

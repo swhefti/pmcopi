@@ -18,14 +18,25 @@ import {
   CompetitiveContent,
   RoadmapContent,
   SummaryContent,
+  TokenUsage,
 } from '@/types'
 import { AgentPanel } from '@/components/AgentPanel'
 import { ProgressBar } from '@/components/ProgressBar'
 import { ExportButton } from '@/components/ExportButton'
+import { UsagePanel } from '@/components/UsagePanel'
 
 const AGENT_ORDER: ArtifactType[] = ['prd', 'competitive', 'roadmap', 'summary']
 
 type ArtifactContent = PRDContent | CompetitiveContent | RoadmapContent | SummaryContent
+
+type UsageRecord = Record<ArtifactType, TokenUsage | null>
+
+const initialUsage: UsageRecord = {
+  prd: null,
+  competitive: null,
+  roadmap: null,
+  summary: null,
+}
 
 export default function SessionPage() {
   const { id } = useParams<{ id: string }>()
@@ -35,10 +46,12 @@ export default function SessionPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [hasStartedGeneration, setHasStartedGeneration] = useState(false)
+  const [usage, setUsage] = useState<UsageRecord>(initialUsage)
 
   const runGeneration = useCallback(async (sessionId: string, challenge: string) => {
     if (hasStartedGeneration) return
     setHasStartedGeneration(true)
+    setUsage(initialUsage)
 
     try {
       const response = await fetch('/api/generate', {
@@ -74,6 +87,14 @@ export default function SessionPage() {
             setCompletedAgents((prev) => [...prev, event.agent!])
             setActiveAgent(null)
             setSessionData(getSessionWithArtifacts(sessionId))
+
+            // Track usage
+            if (event.usage) {
+              setUsage((prev) => ({
+                ...prev,
+                [event.agent!]: event.usage!,
+              }))
+            }
           }
           if (event.type === 'pipeline_complete') {
             updateSessionStatus(sessionId, 'complete')
@@ -136,6 +157,7 @@ export default function SessionPage() {
     setError(null)
     setHasStartedGeneration(false)
     setCompletedAgents([])
+    setUsage(initialUsage)
     const session = getSession(id)
     if (session) {
       updateSessionStatus(id, 'generating')
@@ -255,6 +277,9 @@ export default function SessionPage() {
             />
           ))}
         </div>
+
+        {/* Usage Panel */}
+        <UsagePanel usage={usage} isComplete={isComplete} />
       </main>
     </div>
   )

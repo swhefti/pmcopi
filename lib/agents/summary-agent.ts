@@ -1,15 +1,21 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { SummaryContent, PRDContent, CompetitiveContent, RoadmapContent } from '@/types'
+import { SummaryContent, PRDContent, CompetitiveContent, RoadmapContent, TokenUsage } from '@/types'
 import { parseJSONFromLLM } from '@/lib/parse-json'
+import { calculateCost } from '@/lib/calculate-cost'
 
 const client = new Anthropic()
+
+export interface SummaryAgentResult {
+  content: SummaryContent
+  usage: TokenUsage
+}
 
 export async function runSummaryAgent(
   challenge: string,
   prd: PRDContent,
   competitive: CompetitiveContent,
   roadmap: RoadmapContent
-): Promise<SummaryContent> {
+): Promise<SummaryAgentResult> {
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
@@ -38,5 +44,8 @@ Write for a C-suite audience. Avoid jargon. Be specific about numbers where the 
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return parseJSONFromLLM<SummaryContent>(text)
+  const content = parseJSONFromLLM<SummaryContent>(text)
+  const usage = calculateCost(message.usage.input_tokens, message.usage.output_tokens)
+
+  return { content, usage }
 }

@@ -83,10 +83,23 @@ export interface SummaryContent {
   key_metrics: string[]
 }
 
+// --- Token Usage ---
+export interface TokenUsage {
+  input_tokens: number
+  output_tokens: number
+  cost_usd: number
+}
+
+export interface AgentUsage {
+  agent: ArtifactType
+  usage: TokenUsage
+}
+
 // --- Streaming ---
 export interface SSEEvent {
   type: 'agent_start' | 'agent_complete' | 'pipeline_complete' | 'error'
   agent?: ArtifactType
   content?: PRDContent | CompetitiveContent | RoadmapContent | SummaryContent
+  usage?: TokenUsage
   error?: string
 }

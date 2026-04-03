@@ -1,13 +1,19 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { CompetitiveContent, PRDContent } from '@/types'
+import { CompetitiveContent, PRDContent, TokenUsage } from '@/types'
 import { parseJSONFromLLM } from '@/lib/parse-json'
+import { calculateCost } from '@/lib/calculate-cost'
 
 const client = new Anthropic()
+
+export interface CompetitiveAgentResult {
+  content: CompetitiveContent
+  usage: TokenUsage
+}
 
 export async function runCompetitiveAgent(
   challenge: string,
   prd: PRDContent
-): Promise<CompetitiveContent> {
+): Promise<CompetitiveAgentResult> {
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
@@ -40,5 +46,8 @@ Use real, well-known companies as competitors where relevant. Be analytically ho
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return parseJSONFromLLM<CompetitiveContent>(text)
+  const content = parseJSONFromLLM<CompetitiveContent>(text)
+  const usage = calculateCost(message.usage.input_tokens, message.usage.output_tokens)
+
+  return { content, usage }
 }

@@ -20,36 +20,60 @@ async function main() {
   console.log('Challenge:', TEST_CHALLENGE)
   console.log('\n' + '='.repeat(60) + '\n')
 
+  let totalInputTokens = 0
+  let totalOutputTokens = 0
+  let totalCost = 0
+
   try {
     // Agent 1: PRD
     console.log('📝 Running PRD Agent...')
-    const prd = await runPRDAgent(TEST_CHALLENGE)
+    const prdResult = await runPRDAgent(TEST_CHALLENGE)
     console.log('✅ PRD Agent complete')
-    console.log(JSON.stringify(prd, null, 2))
+    console.log('Usage:', prdResult.usage)
+    console.log(JSON.stringify(prdResult.content, null, 2))
+    totalInputTokens += prdResult.usage.input_tokens
+    totalOutputTokens += prdResult.usage.output_tokens
+    totalCost += prdResult.usage.cost_usd
     console.log('\n' + '='.repeat(60) + '\n')
 
     // Agent 2: Competitive
     console.log('🔍 Running Competitive Agent...')
-    const competitive = await runCompetitiveAgent(TEST_CHALLENGE, prd)
+    const competitiveResult = await runCompetitiveAgent(TEST_CHALLENGE, prdResult.content)
     console.log('✅ Competitive Agent complete')
-    console.log(JSON.stringify(competitive, null, 2))
+    console.log('Usage:', competitiveResult.usage)
+    console.log(JSON.stringify(competitiveResult.content, null, 2))
+    totalInputTokens += competitiveResult.usage.input_tokens
+    totalOutputTokens += competitiveResult.usage.output_tokens
+    totalCost += competitiveResult.usage.cost_usd
     console.log('\n' + '='.repeat(60) + '\n')
 
     // Agent 3: Roadmap
     console.log('🗺️ Running Roadmap Agent...')
-    const roadmap = await runRoadmapAgent(TEST_CHALLENGE, prd, competitive)
+    const roadmapResult = await runRoadmapAgent(TEST_CHALLENGE, prdResult.content, competitiveResult.content)
     console.log('✅ Roadmap Agent complete')
-    console.log(JSON.stringify(roadmap, null, 2))
+    console.log('Usage:', roadmapResult.usage)
+    console.log(JSON.stringify(roadmapResult.content, null, 2))
+    totalInputTokens += roadmapResult.usage.input_tokens
+    totalOutputTokens += roadmapResult.usage.output_tokens
+    totalCost += roadmapResult.usage.cost_usd
     console.log('\n' + '='.repeat(60) + '\n')
 
     // Agent 4: Summary
     console.log('📊 Running Summary Agent...')
-    const summary = await runSummaryAgent(TEST_CHALLENGE, prd, competitive, roadmap)
+    const summaryResult = await runSummaryAgent(TEST_CHALLENGE, prdResult.content, competitiveResult.content, roadmapResult.content)
     console.log('✅ Summary Agent complete')
-    console.log(JSON.stringify(summary, null, 2))
+    console.log('Usage:', summaryResult.usage)
+    console.log(JSON.stringify(summaryResult.content, null, 2))
+    totalInputTokens += summaryResult.usage.input_tokens
+    totalOutputTokens += summaryResult.usage.output_tokens
+    totalCost += summaryResult.usage.cost_usd
     console.log('\n' + '='.repeat(60) + '\n')
 
     console.log('🎉 All agents completed successfully!')
+    console.log('\n📊 Total Usage:')
+    console.log(`   Input tokens:  ${totalInputTokens.toLocaleString()}`)
+    console.log(`   Output tokens: ${totalOutputTokens.toLocaleString()}`)
+    console.log(`   Total cost:    $${totalCost.toFixed(4)}`)
   } catch (error) {
     console.error('❌ Pipeline failed:', error)
     process.exit(1)
